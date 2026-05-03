@@ -10,13 +10,17 @@ import os
 from shapely.geometry import MultiPolygon, Polygon
 from shapely.ops import unary_union
 
-def show_image(title, img, max_size=1000):
-	if(max(img.shape[0], img.shape[1]) > max_size):
-		print(img.shape)
-		scale_factor = max_size / max(img.shape[0], img.shape[1])
-		img = cv2.resize(img, (int(img.shape[1] * scale_factor), int(img.shape[0] * scale_factor)))
+MAX_DISTANCE = 300
+INTERACTIVE = False
 
-	cv2.imshow(title, img)
+def show_image(title, img, max_size=1000):
+	if INTERACTIVE:
+		if(max(img.shape[0], img.shape[1]) > max_size):
+			print(img.shape)
+			scale_factor = max_size / max(img.shape[0], img.shape[1])
+			img = cv2.resize(img, (int(img.shape[1] * scale_factor), int(img.shape[0] * scale_factor)))
+
+		cv2.imshow(title, img)
 	
 def gradient_gaussian_edge_preserve(gray, sigma=1.5, edge_strength=1.0):
 	"""
@@ -242,12 +246,6 @@ def combine_polygons():
 
 
 def detect_circles(image_path, max_radius:int=200, lines=None, distance_from_edge=40):
-	if len(sys.argv) != 2:
-		print("Usage: python script.py <image_path>")
-		sys.exit(1)
-
-	image_path = sys.argv[1]
-
 	if not os.path.exists(image_path):
 		print(f"Error: File '{image_path}' not found.")
 		sys.exit(1)
@@ -403,7 +401,7 @@ def detect_circles(image_path, max_radius:int=200, lines=None, distance_from_edg
 			# Draw the center
 			cv2.circle(output, (x, y), 2, (0, 0, 255), 3)
 
-	cv2.imwrite("reconstructed_circle.png", output)
+	cv2.imwrite("map/annotated_map.png", output)
 	show_image("Detected Circle", output)
 
 	return filtered
@@ -436,14 +434,7 @@ def flatten_rho_theta_ignore_distance(data: List[Any]) -> List[Tuple[float, floa
 
 	return flattened
 
-if __name__ == "__main__":
-	if len(sys.argv) < 2:
-		print("Usage: python detect_parallel_lines.py <image_path>")
-		sys.exit(1)
-
-	MAX_DISTANCE = 300
-
-	image_path = sys.argv[1]
+def find_craters(image_path):
 	img, lines = detect_lines(image_path)
 
 	parallels = find_parallel_lines(lines, angle_tolerance_deg=1, min_distance=MAX_DISTANCE / 2)
@@ -474,7 +465,19 @@ if __name__ == "__main__":
 
 	# Detect circles
 	circles = detect_circles(image_path, int(max_distance), flatten_rho_theta_ignore_distance(parallels))
-	
+
+	return circles
+
+if __name__ == "__main__":
+	if len(sys.argv) < 2:
+		print("Usage: python detect_parallel_lines.py <image_path>")
+		sys.exit(1)
+
+	INTERACTIVE = True
+	image_path = sys.argv[1]
+
+	circles = find_craters(image_path)
+
 	# Push data to socket
 	client_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 	client_socket.connect("/tmp/detection_socket")
