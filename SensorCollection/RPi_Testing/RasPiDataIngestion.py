@@ -11,6 +11,15 @@ import time
 import struct
 from datetime import datetime
 
+
+def format_float(value):
+    return '' if value is None else f"{value:.2f}"
+
+
+def format_value(value):
+    return '' if value is None else value
+
+
 class ArduinoSensorReader:
     def __init__(self, bus_number=1, arduino_address=0x0F, max_retries=3, retry_delay=0.1):
         """
@@ -108,14 +117,6 @@ class ArduinoSensorReader:
         readings['strength'] = data[7]
         readings['temperature'] = data[8]
 
-        # Filter small accelerometer values
-        if abs(readings['acceleration_x']) < 0.075:
-            readings['acceleration_x'] = 0.0
-        if abs(readings['acceleration_y']) < 0.075:
-            readings['acceleration_y'] = 0.0
-        if abs(readings['acceleration_z']) < 0.075:
-            readings['acceleration_z'] = 0.0
-
         return readings
 
     def close(self):
@@ -132,6 +133,7 @@ def main(output_file='sensor_data.csv', interval=0.25):
     # Initialize sensor reader
     reader = ArduinoSensorReader()
     fieldnames = [
+        'sample_count',
         'timestamp',
         'acceleration_x',
         'acceleration_y',
@@ -157,30 +159,28 @@ def main(output_file='sensor_data.csv', interval=0.25):
                 cycle_start = time.perf_counter()
                 timestamp = datetime.utcnow().isoformat(timespec='milliseconds') + 'Z'
                 readings = reader.read_all_sensors()
+                sample_number = sample_count + 1
 
                 row = {
+                    'sample_count': f"{sample_number:02d}",
                     'timestamp': timestamp,
-                    'acceleration_x': readings.get('acceleration_x'),
-                    'acceleration_y': readings.get('acceleration_y'),
-                    'acceleration_z': readings.get('acceleration_z'),
-                    'gyroscope_x': readings.get('gyroscope_x'),
-                    'gyroscope_y': readings.get('gyroscope_y'),
-                    'gyroscope_z': readings.get('gyroscope_z'),
-                    'distance': readings.get('distance'),
-                    'strength': readings.get('strength'),
-                    'temperature': readings.get('temperature'),
+                    'acceleration_x': format_float(readings.get('acceleration_x')),
+                    'acceleration_y': format_float(readings.get('acceleration_y')),
+                    'acceleration_z': format_float(readings.get('acceleration_z')),
+                    'gyroscope_x': format_float(readings.get('gyroscope_x')),
+                    'gyroscope_y': format_float(readings.get('gyroscope_y')),
+                    'gyroscope_z': format_float(readings.get('gyroscope_z')),
+                    'distance': format_value(readings.get('distance')),
+                    'strength': format_value(readings.get('strength')),
+                    'temperature': format_value(readings.get('temperature')),
                 }
-                # Round float values to 2 decimals to match terminal output
-                for key in ['acceleration_x', 'acceleration_y', 'acceleration_z', 'gyroscope_x', 'gyroscope_y', 'gyroscope_z']:
-                    if row[key] is not None:
-                        row[key] = round(row[key], 2)
                 writer.writerow(row)
                 csvfile.flush()
 
                 if sample_count < 50:
-                    print(f"[{sample_count + 1:02d}] {timestamp} | "
-                          f"ax={row['acceleration_x']:.2f} ay={row['acceleration_y']:.2f} az={row['acceleration_z']:.2f} | "
-                          f"gx={row['gyroscope_x']:.2f} gy={row['gyroscope_y']:.2f} gz={row['gyroscope_z']:.2f} | "
+                    print(f"[{sample_number:02d}] {timestamp} | "
+                          f"ax={row['acceleration_x']} ay={row['acceleration_y']} az={row['acceleration_z']} | "
+                          f"gx={row['gyroscope_x']} gy={row['gyroscope_y']} gz={row['gyroscope_z']} | "
                           f"dist={row['distance']} str={row['strength']} temp={row['temperature']}")
 
                 sample_count += 1
