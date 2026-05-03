@@ -235,6 +235,11 @@ code {
   margin-bottom: 1rem;
 }
 
+.inline-form-row {
+  display: inline-flex;
+  margin: 0;
+}
+
 .btn-sm {
   padding: 0.45rem 0.75rem;
   font-size: 0.875rem;
@@ -386,4 +391,31 @@ code {
 
 .file-chop-list code {
   color: var(--text);
+}
+
+.scan-banner {
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent-dim);
+  background: rgba(61, 139, 253, 0.08);
+}
+
+.first-pass-wrap {
+  margin: 0 0 1rem;
+  max-width: 48rem;
+}
+
+.first-pass-img {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.admin-tools {
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 1px dashed var(--border);
 }
