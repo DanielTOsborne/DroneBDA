@@ -44,6 +44,27 @@ def resolve_annotated_map_png() -> Path | None:
     return None
 
 
+def resolve_crater_offset_csv() -> Path | None:
+    """
+    CSV of crater offsets from the camera pipeline (``cameraComplete`` table).
+
+    Resolution order:
+
+    1. ``DRONEBDA_COORDINATES_CSV`` — absolute path if set and the file exists.
+    2. ``DRONEBDA_CRATER_OFFSET_CSV`` — same (older name), if set and the file exists.
+    3. ``<repo>/camera/coordinates.csv`` (canonical; lives in ``camera/``, not ``camera/map/``).
+    """
+    for key in ("DRONEBDA_COORDINATES_CSV", "DRONEBDA_CRATER_OFFSET_CSV"):
+        raw = os.environ.get(key, "").strip()
+        if raw:
+            p = Path(raw).expanduser().resolve()
+            if p.is_file():
+                return p
+    root = get_repo_root()
+    p = root / "camera" / "coordinates.csv"
+    return p if p.is_file() else None
+
+
 def get_reports_dir() -> Path:
     """BoM markdown + DD2768 PDFs: ``Output Reporting/Reports`` under repo root."""
     return get_repo_root() / "Output Reporting" / "Reports"

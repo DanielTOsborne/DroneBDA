@@ -4,7 +4,8 @@
 
 from __future__ import annotations
 
-
+import csv
+from pathlib import Path
 
 from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, send_file, url_for
 
@@ -12,7 +13,7 @@ from flask import Blueprint, abort, flash, jsonify, redirect, render_template, r
 
 from Server.cloud_scan_report import generate_bom_on_disk, resolve_pointcloud_csv
 
-from Server.config import get_repo_root, resolve_annotated_map_png
+from Server.config import get_repo_root, resolve_annotated_map_png, resolve_crater_offset_csv
 
 from Server.system_state import DEFAULT_CURRENT, read_state, write_state
 
@@ -62,6 +63,30 @@ def annotated_map_image_url() -> str | None:
     if resolve_annotated_map_png() is None:
         return None
     return url_for("start_bda.annotated_map_image")
+
+
+def _load_crater_offset_table(csv_path: Path | None) -> tuple[list[str], list[list[str]]] | None:
+    """Return ``(header_cells, data_rows)`` for display, or ``None`` if missing/unreadable."""
+    if csv_path is None or not csv_path.is_file():
+        return None
+    try:
+        with csv_path.open(newline="", encoding="utf-8", errors="replace") as f:
+            rows = list(csv.reader(f))
+    except OSError:
+        return None
+    if not rows:
+        return None
+    header = [c.strip() or f"Column {i + 1}" for i, c in enumerate(rows[0])]
+    n = len(header)
+    data: list[list[str]] = []
+    for raw in rows[1:]:
+        cells = [("" if c is None else str(c)).strip() for c in raw]
+        if len(cells) < n:
+            cells.extend([""] * (n - len(cells)))
+        else:
+            cells = cells[:n]
+        data.append(cells)
+    return header, data
 
 
 def _split_lat_lon(start_position: str) -> tuple[str, str]:
@@ -164,6 +189,13 @@ def index():
 
     img_url = annotated_map_image_url() if complete else None
 
+    crater_offset_headers: list[str] | None = None
+    crater_offset_rows: list[list[str]] | None = None
+    if complete:
+        loaded = _load_crater_offset_table(resolve_crater_offset_csv())
+        if loaded is not None:
+            crater_offset_headers, crater_offset_rows = loaded
+
     show_start = current not in (
 
         STATE_SCAN,
@@ -207,6 +239,10 @@ def index():
         annotated_map_url=img_url,
 
         annotated_map_missing=complete and img_url is None,
+
+        crater_offset_headers=crater_offset_headers,
+
+        crater_offset_rows=crater_offset_rows,
 
         admin_next=admin_next,
 

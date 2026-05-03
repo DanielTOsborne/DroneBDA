@@ -13,14 +13,46 @@
   {% endif %}</p>
 {% if complete %}
 <h2 class="subh">Annotated map</h2>
-<p class="lede">Imaging reports <code>cameraComplete</code>. Review the annotated map, then accept to continue.</p>
-{% if annotated_map_url %}
-<figure class="annotated-map-wrap">
-  <img class="annotated-map-img" src="{{ annotated_map_url }}" alt="Annotated runway map (camera pipeline)">
-</figure>
-{% elif annotated_map_missing %}
-<p class="lede meta">No annotated map PNG found. Expected <code>camera/map/annotated_map.png</code> under the repo root (or legacy <code>map/annotated_map.png</code>). On the Pi you can set <code>DRONEBDA_REPO_ROOT</code> or <code>DRONEBDA_ANNOTATED_MAP</code> if the file lives elsewhere.</p>
-{% endif %}
+<p class="lede">Imaging reports <code>cameraComplete</code>. Review the annotated map and crater offset table, then accept to continue.</p>
+<div class="camera-complete-layout">
+  <div class="camera-complete-map">
+    {% if annotated_map_url %}
+    <figure class="annotated-map-wrap">
+      <img class="annotated-map-img" src="{{ annotated_map_url }}" alt="Annotated runway map (camera pipeline)">
+    </figure>
+    {% elif annotated_map_missing %}
+    <p class="lede meta">No annotated map PNG found. Expected <code>camera/map/annotated_map.png</code> under the repo root (or legacy <code>map/annotated_map.png</code>). On the Pi you can set <code>DRONEBDA_REPO_ROOT</code> or <code>DRONEBDA_ANNOTATED_MAP</code> if the file lives elsewhere.</p>
+    {% endif %}
+  </div>
+  <aside class="camera-complete-offsets" aria-label="Crater offsets from camera pipeline CSV">
+    <h3 class="subh crater-offsets-heading">Crater offsets</h3>
+    {% if crater_offset_headers %}
+    <div class="crater-offsets-scroll">
+      <table class="crater-offsets-table">
+        <thead>
+          <tr>
+            {% for h in crater_offset_headers %}
+            <th scope="col">{{ h }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in crater_offset_rows %}
+          <tr>
+            {% for cell in row %}
+            <td>{{ cell }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="meta crater-offsets-foot">Values from <code>camera/coordinates.csv</code> (or <code>DRONEBDA_COORDINATES_CSV</code>). Units are as produced by the camera pipeline.</p>
+    {% else %}
+    <p class="meta">No offset CSV yet. Expected <code>camera/coordinates.csv</code> (or set <code>DRONEBDA_COORDINATES_CSV</code> / <code>DRONEBDA_CRATER_OFFSET_CSV</code> to a full path).</p>
+    {% endif %}
+  </aside>
+</div>
 <form method="post" action="{{ url_for('start_bda.accept') }}" class="report-toolbar">
   <button type="submit" class="btn btn-muted">Accept</button>
   <a class="btn btn-primary btn-sm" href="{{ url_for('home') }}">Hub</a>

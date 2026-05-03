@@ -400,6 +400,73 @@ code {
   background: rgba(61, 139, 253, 0.08);
 }
 
+.camera-complete-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.camera-complete-map {
+  flex: 1 1 16rem;
+  min-width: 0;
+  max-width: 48rem;
+}
+
+.camera-complete-map .annotated-map-wrap {
+  margin-bottom: 0;
+}
+
+.camera-complete-offsets {
+  flex: 1 1 14rem;
+  min-width: 12rem;
+  max-width: 28rem;
+}
+
+.crater-offsets-heading {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.crater-offsets-scroll {
+  max-height: min(70vh, 28rem);
+  overflow: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: rgba(61, 139, 253, 0.06);
+}
+
+.crater-offsets-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.crater-offsets-table th,
+.crater-offsets-table td {
+  padding: 0.4rem 0.55rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.crater-offsets-table th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  font-weight: 600;
+  z-index: 1;
+}
+
+.crater-offsets-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.crater-offsets-foot {
+  margin: 0.5rem 0 0;
+}
+
 .annotated-map-wrap,
 .first-pass-wrap {
   margin: 0 0 1rem;
