@@ -88,37 +88,33 @@ class ArduinoSensorReader:
 
     def read_all_sensors(self):
         """
-        Read all sensor data at once
+        Read all sensor data at once using command 0x04
 
         Returns:
             dict: Dictionary containing all sensor readings
         """
+        data = self._read_sensor_data(0x04, 30, '<ffffffhhh', 'all sensors')
+        if data is None:
+            return {}
+
         readings = {}
+        readings['acceleration_x'] = data[0]
+        readings['acceleration_y'] = data[1]
+        readings['acceleration_z'] = data[2]
+        readings['gyroscope_x'] = data[3]
+        readings['gyroscope_y'] = data[4]
+        readings['gyroscope_z'] = data[5]
+        readings['distance'] = data[6]
+        readings['strength'] = data[7]
+        readings['temperature'] = data[8]
 
-        accel = self.read_acceleration()
-        if accel is not None:
-            readings['acceleration_x'] = accel[0]
-            readings['acceleration_y'] = accel[1]
-            readings['acceleration_z'] = accel[2]
-            # Filter small accelerometer values
-            if abs(readings['acceleration_x']) < 0.075:
-                readings['acceleration_x'] = 0.0
-            if abs(readings['acceleration_y']) < 0.075:
-                readings['acceleration_y'] = 0.0
-            if abs(readings['acceleration_z']) < 0.075:
-                readings['acceleration_z'] = 0.0
-
-        gyro = self.read_gyroscope()
-        if gyro is not None:
-            readings['gyroscope_x'] = gyro[0]
-            readings['gyroscope_y'] = gyro[1]
-            readings['gyroscope_z'] = gyro[2]
-
-        distance = self.read_distance_sensor()
-        if distance is not None:
-            readings['distance'] = distance[0]
-            readings['strength'] = distance[1]
-            readings['temperature'] = distance[2]
+        # Filter small accelerometer values
+        if abs(readings['acceleration_x']) < 0.075:
+            readings['acceleration_x'] = 0.0
+        if abs(readings['acceleration_y']) < 0.075:
+            readings['acceleration_y'] = 0.0
+        if abs(readings['acceleration_z']) < 0.075:
+            readings['acceleration_z'] = 0.0
 
         return readings
 

@@ -142,6 +142,9 @@ void requestHandler() {
     Wire.write((uint8_t*)&sensorBuffer.gx, sizeof(sensorBuffer.gx) * 3);
   } else if (currentCommand == 0x03) {
     Wire.write((uint8_t*)&sensorBuffer.dis, sizeof(sensorBuffer.dis) * 3);
+  } else if (currentCommand == 0x04) {
+    // Send all data: 3 floats accel, 3 floats gyro, 3 ints distance
+    Wire.write((uint8_t*)&sensorBuffer, sizeof(sensorBuffer));
   } else {
     uint8_t zero = 0;
     Wire.write(&zero, 1);
