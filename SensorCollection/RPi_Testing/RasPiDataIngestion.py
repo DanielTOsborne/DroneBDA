@@ -100,6 +100,13 @@ class ArduinoSensorReader:
             readings['acceleration_x'] = accel[0]
             readings['acceleration_y'] = accel[1]
             readings['acceleration_z'] = accel[2]
+            # Filter small accelerometer values
+            if abs(readings['acceleration_x']) < 0.075:
+                readings['acceleration_x'] = 0.0
+            if abs(readings['acceleration_y']) < 0.075:
+                readings['acceleration_y'] = 0.0
+            if abs(readings['acceleration_z']) < 0.075:
+                readings['acceleration_z'] = 0.0
 
         gyro = self.read_gyroscope()
         if gyro is not None:
