@@ -6,8 +6,11 @@
 
 // Setup MPU6050
 Adafruit_MPU6050 mpu;
-// Create calibration 
+// Create calibration
 float calibration_gx, calibration_gy, calibration_gz;
+float calibration_ax, calibration_ay, calibration_az;
+float accel_offset_x, accel_offset_y, accel_offset_z;
+float accel_scale;
 int calibration_count;
 
 // Setup TFminiS device
@@ -43,10 +46,13 @@ void setup() {
   calibration_gx = 0;
   calibration_gy = 0;
   calibration_gz = 0;
-}
-
-float calibrate(float raw_val, float cal_max, float cal_min){
-  return (((raw_val - cal_min) * (9.81 - (-9.81))) / (cal_max - cal_min)) + -9.81;
+  calibration_ax = 0;
+  calibration_ay = 0;
+  calibration_az = 0;
+  accel_offset_x = 0;
+  accel_offset_y = 0;
+  accel_offset_z = 0;
+  accel_scale = 1.0;
 }
 
 struct myIMU {
@@ -70,28 +76,52 @@ void loop() {
   myIMU updatedBuffer = sensorBuffer;
 
   if (calibration_count < 1000) {
-    if (calibration_count % 100 == 0){
-      if (ledState == LOW) {
-        ledState = HIGH;
-      } else {
-        ledState = LOW;
-      }
+    if (calibration_count % 100 == 0) {
+      ledState = (ledState == LOW) ? HIGH : LOW;
       digitalWrite(LED_BUILTIN, ledState);
     }
 
     calibration_gx += g.gyro.x;
     calibration_gy += g.gyro.y;
     calibration_gz += g.gyro.z;
+    calibration_ax += a.acceleration.x;
+    calibration_ay += a.acceleration.y;
+    calibration_az += a.acceleration.z;
     calibration_count += 1;
   } else if (calibration_count == 1000) {
     calibration_gx /= 1000;
     calibration_gy /= 1000;
     calibration_gz /= 1000;
+
+    float avg_ax = calibration_ax / 1000.0;
+    float avg_ay = calibration_ay / 1000.0;
+    float avg_az = calibration_az / 1000.0;
+
+    accel_offset_x = avg_ax;
+    accel_offset_y = avg_ay;
+    accel_offset_z = avg_az - 9.81;
+
+    float avg_norm = sqrt(avg_ax * avg_ax + avg_ay * avg_ay + avg_az * avg_az);
+    if (avg_norm > 0.001) {
+      accel_scale = 9.81 / avg_norm;
+    } else {
+      accel_scale = 1.0;
+    }
+
+    Serial.print("Accel offset: ");
+    Serial.print(accel_offset_x, 4);
+    Serial.print(", ");
+    Serial.print(accel_offset_y, 4);
+    Serial.print(", ");
+    Serial.println(accel_offset_z, 4);
+    Serial.print("Accel scale: ");
+    Serial.println(accel_scale, 6);
+
     calibration_count += 1;
   } else {
-    updatedBuffer.ax = calibrate(a.acceleration.x, 9.8, -9.61);
-    updatedBuffer.ay = calibrate(a.acceleration.y, 9.86, -9.85);
-    updatedBuffer.az = calibrate(a.acceleration.z, 10.9, -8.8);
+    updatedBuffer.ax = (a.acceleration.x - accel_offset_x) * accel_scale;
+    updatedBuffer.ay = (a.acceleration.y - accel_offset_y) * accel_scale;
+    updatedBuffer.az = (a.acceleration.z - accel_offset_z) * accel_scale;
     updatedBuffer.gx = (g.gyro.x - calibration_gx);
     updatedBuffer.gy = (g.gyro.y - calibration_gy);
     updatedBuffer.gz = (g.gyro.z - calibration_gz);
