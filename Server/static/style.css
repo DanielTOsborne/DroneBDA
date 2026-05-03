@@ -400,11 +400,13 @@ code {
   background: rgba(61, 139, 253, 0.08);
 }
 
+.annotated-map-wrap,
 .first-pass-wrap {
   margin: 0 0 1rem;
   max-width: 48rem;
 }
 
+.annotated-map-img,
 .first-pass-img {
   display: block;
   width: 100%;

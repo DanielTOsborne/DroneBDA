@@ -7,8 +7,41 @@ from pathlib import Path
 
 
 def get_repo_root() -> Path:
-    """DroneBDA repository root (parent of ``Server/``)."""
+    """DroneBDA repository root (parent of ``Server/``).
+
+    Set ``DRONEBDA_REPO_ROOT`` on the Pi (or any host) if the app must resolve data files
+    against a checkout that is not next to this ``Server/`` tree.
+    """
+    raw = os.environ.get("DRONEBDA_REPO_ROOT", "").strip()
+    if raw:
+        return Path(raw).expanduser().resolve()
     return Path(__file__).resolve().parent.parent
+
+
+def resolve_annotated_map_png() -> Path | None:
+    """
+    Annotated map shown in ``cameraComplete``.
+
+    Resolution order:
+
+    1. ``DRONEBDA_ANNOTATED_MAP`` — absolute path to a ``.png`` if set and the file exists.
+    2. ``<repo>/camera/map/annotated_map.png`` (canonical).
+    3. ``<repo>/map/annotated_map.png`` — legacy output when ``camera/find_craters.py`` ran with
+       cwd at repo root (``cv2.imwrite("map/annotated_map.png", ...)``).
+    """
+    env = os.environ.get("DRONEBDA_ANNOTATED_MAP", "").strip()
+    if env:
+        p = Path(env).expanduser().resolve()
+        return p if p.is_file() else None
+    root = get_repo_root()
+    for rel in (
+        Path("camera") / "map" / "annotated_map.png",
+        Path("map") / "annotated_map.png",
+    ):
+        candidate = root / rel
+        if candidate.is_file():
+            return candidate
+    return None
 
 
 def get_reports_dir() -> Path:

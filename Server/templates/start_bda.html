@@ -14,19 +14,19 @@
 {% if complete %}
 <h2 class="subh">Annotated map</h2>
 <p class="lede">Imaging reports <code>cameraComplete</code>. Review the annotated map, then accept to continue.</p>
-{% if first_pass_url %}
-<figure class="first-pass-wrap">
-  <img class="first-pass-img" src="{{ first_pass_url }}" alt="Annotated map from camera scan">
+{% if annotated_map_url %}
+<figure class="annotated-map-wrap">
+  <img class="annotated-map-img" src="{{ annotated_map_url }}" alt="Annotated runway map (camera pipeline)">
 </figure>
-{% elif first_pass_missing %}
-<p class="lede meta">No <code>camera/map/annotated_map.png</code> at repo root yet. Add the file there and refresh.</p>
+{% elif annotated_map_missing %}
+<p class="lede meta">No annotated map PNG found. Expected <code>camera/map/annotated_map.png</code> under the repo root (or legacy <code>map/annotated_map.png</code>). On the Pi you can set <code>DRONEBDA_REPO_ROOT</code> or <code>DRONEBDA_ANNOTATED_MAP</code> if the file lives elsewhere.</p>
 {% endif %}
 <form method="post" action="{{ url_for('start_bda.accept') }}" class="report-toolbar">
   <button type="submit" class="btn btn-muted">Accept</button>
   <a class="btn btn-primary btn-sm" href="{{ url_for('home') }}">Hub</a>
 </form>
 {% elif scanning %}
-<p class="lede scan-banner">The drone is currently conducting its <strong>first pass scan</strong> (state <code>cameraScan</code>). When imaging finishes, another component will move the state to <code>cameraComplete</code>.</p>
+<p class="lede scan-banner">The drone is conducting its <strong>camera imaging pass</strong> (state <code>cameraScan</code>). When imaging finishes, the pipeline should move the state to <code>cameraComplete</code> and write <code>camera/map/annotated_map.png</code>.</p>
 <a class="btn btn-muted btn-sm" href="{{ url_for('home') }}">Back to hub</a>
 {% elif moving %}
 <p class="lede scan-banner">State is <code>moveToPoint</code>. Wait for the system to report <code>cloudScan</code> when the drone has reached the LiDAR scan point—or if you <strong>moved it manually</strong>, use <strong>Override Location</strong> to record that it is in position for LiDAR.</p>
@@ -45,7 +45,7 @@
   <a class="btn btn-muted btn-sm" href="{{ url_for('home') }}">Hub</a>
 </div>
 {% elif show_start %}
-<p class="lede">Begin the damage-assessment flow: set state to <code>cameraScan</code> so onboard camera work can run its first pass.</p>
+<p class="lede">Begin the damage-assessment flow: set state to <code>cameraScan</code> so onboard camera imaging can run.</p>
 <p class="meta">If GPS has no fix, enter a manual start point in <strong>decimal degrees</strong> (WGS84). Both fields must be filled to save a value; leave both blank to write an empty <code>start position</code> line.</p>
 <form method="post" action="{{ url_for('start_bda.run') }}" class="start-flow-form">
   <div class="coord-pair">

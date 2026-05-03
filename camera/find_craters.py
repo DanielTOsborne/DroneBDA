@@ -1,4 +1,5 @@
 from collections import Counter
+from pathlib import Path
 import socket
 from typing import Any, List, Tuple
 import cv2
@@ -401,7 +402,11 @@ def detect_circles(image_path, max_radius:int=200, lines=None, distance_from_edg
 			# Draw the center
 			cv2.circle(output, (x, y), 2, (0, 0, 255), 3)
 
-	cv2.imwrite("map/annotated_map.png", output)
+	# Always under this package (matches hub: ``camera/map/annotated_map.png`` from repo root).
+	_map_dir = Path(__file__).resolve().parent / "map"
+	_map_dir.mkdir(parents=True, exist_ok=True)
+	_out = _map_dir / "annotated_map.png"
+	cv2.imwrite(str(_out), output)
 	show_image("Detected Circle", output)
 
 	return filtered
