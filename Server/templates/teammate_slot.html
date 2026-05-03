@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}{{ slot_title }} — DroneBDA server{% endblock %}
+{% block body %}
+<p class="crumb"><a href="{{ url_for('home') }}">Home</a> / {{ slot_title }}</p>
+<h1>{{ slot_title }}</h1>
+<p class="lede">Placeholder. Add routes in <code>Server/teammate_slot_{{ slot_number }}.py</code> and templates as needed.</p>
+{% endblock %}

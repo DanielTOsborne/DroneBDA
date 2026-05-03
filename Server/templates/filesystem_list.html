@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Filesystem — DroneBDA server{% endblock %}
+{% block body %}
+<p class="crumb"><a href="{{ url_for('home') }}">Home</a> / Filesystem</p>
+<h1>Filesystem</h1>
+<p class="meta">Root on server: <code>{{ root }}</code></p>
+<p class="meta pathline">Path: <code>{{ display_path }}</code></p>
+{% if parent_href %}
+<p class="parent"><a href="{{ parent_href }}">↑ Parent directory</a></p>
+{% endif %}
+<table class="listing">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th class="num">Size</th>
+      <th>Modified</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for e in entries %}
+    <tr>
+      <td>
+        {% if e.is_dir %}
+        <a href="{{ e.href }}">{{ e.name }}</a>
+        {% else %}
+        <a href="{{ e.href }}">{{ e.name }}</a>
+        <span class="dl">(<a href="{{ e.dl_href }}">download</a>)</span>
+        {% endif %}
+      </td>
+      <td class="num">{{ e.size }}</td>
+      <td class="mono">{{ e.mtime }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3">Empty directory</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

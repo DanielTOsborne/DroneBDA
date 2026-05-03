@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Home — DroneBDA server{% endblock %}
+{% block body %}
+<h1>Hub</h1>
+<p class="lede">Pick a tool. Use <strong>Filesystem</strong> for a plain directory view (debug).</p>
+<nav class="actions" aria-label="Main actions">
+  <a class="btn btn-primary" href="{{ url_for('reports.index') }}">Reports</a>
+  <a class="btn btn-muted" href="{{ url_for('teammate_slot_1.index') }}">TBD</a>
+  <a class="btn btn-muted" href="{{ url_for('teammate_slot_2.index') }}">TBD</a>
+  <a class="btn btn-muted" href="{{ url_for('test_report.index') }}">Test Report</a>
+  <a class="btn btn-muted" href="{{ url_for('clear_reports.index') }}">Clear Reports</a>
+  <div class="spacer" role="presentation"></div>
+  <a class="btn btn-outline" href="{{ url_for('filesystem.browse', rel_path='') }}">Filesystem</a>
+</nav>
+{% endblock %}

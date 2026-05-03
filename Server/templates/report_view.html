@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ label }} — Reports{% endblock %}
+{% block body %}
+<p class="crumb"><a href="{{ url_for('home') }}">Home</a> / <a href="{{ url_for('reports.index') }}">Reports</a> / {{ label }}</p>
+<div class="report-toolbar">
+  <a class="btn btn-muted btn-sm" href="{{ url_for('reports.index') }}">← All reports</a>
+  <a class="btn btn-primary btn-sm" href="{{ download_url }}" download>Download DD2768</a>
+</div>
+<h1 class="report-title">{{ label }}</h1>
+<article class="markdown-body">
+{{ content_html | safe }}
+</article>
+{% endblock %}

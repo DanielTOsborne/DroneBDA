@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Clear reports — DroneBDA server{% endblock %}
+{% block body %}
+<p class="crumb"><a href="{{ url_for('home') }}">Home</a> / Clear reports</p>
+<h1>Clear reports</h1>
+<p class="lede">Removes every <strong>file</strong> in <code>{{ reports_dir }}</code> whose name starts with <code>bom</code> (typical BoM markdown and DD2768 PDFs). The folder is not removed; other files (e.g. <code>.gitkeep</code>) are left alone.</p>
+{% if count == 0 %}
+<p class="meta">No matching files right now.</p>
+<div class="report-toolbar">
+  <a class="btn btn-muted btn-sm" href="{{ url_for('home') }}">Back to hub</a>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('reports.index') }}">Reports</a>
+</div>
+{% else %}
+<p class="meta">{{ count }} file(s) to remove:</p>
+<ul class="file-chop-list">
+  {% for f in files %}
+  <li><code>{{ f.name }}</code></li>
+  {% endfor %}
+</ul>
+<form method="post" action="{{ url_for('clear_reports.run') }}" class="report-toolbar">
+  <button type="submit" class="btn btn-muted">Delete all listed files</button>
+  <a class="btn btn-primary btn-sm" href="{{ url_for('home') }}">Cancel</a>
+</form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Test report result — DroneBDA server{% endblock %}
+{% block body %}
+<p class="crumb"><a href="{{ url_for('home') }}">Home</a> / <a href="{{ url_for('test_report.index') }}">Test report</a> / Result</p>
+<h1>Test report — output</h1>
+<p class="meta">Working directory was <code>{{ reporting_dir }}</code>. Exit code: <strong>{{ returncode }}</strong></p>
+<div class="report-toolbar">
+  <a class="btn btn-primary btn-sm" href="{{ url_for('reports.index') }}">Open Reports</a>
+  <a class="btn btn-muted btn-sm" href="{{ url_for('test_report.index') }}">Run again</a>
+</div>
+{% if stderr %}
+<h2 class="subh">Stderr</h2>
+<pre class="console-out" aria-label="Standard error">{{ stderr }}</pre>
+{% endif %}
+<h2 class="subh">Stdout</h2>
+<pre class="console-out" aria-label="Standard output">{{ stdout or "(empty)" }}</pre>
+{% endblock %}

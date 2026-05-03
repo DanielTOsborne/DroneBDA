@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Reports — DroneBDA server{% endblock %}
+{% block body %}
+<p class="crumb"><a href="{{ url_for('home') }}">Home</a> / Reports</p>
+<h1>Reports</h1>
+{% if not has_pairs %}
+<p class="lede empty-msg">No reports exist yet. Generate outputs into <code>Output Reporting/Reports</code> (a <code>.md</code> plus matching <code>_DD2768.pdf</code> with the same base name).</p>
+{% else %}
+<p class="lede">Open a report to read the BoM markdown. Use <strong>Download DD2768</strong> on that page for the paired PDF.</p>
+<nav class="actions report-list" aria-label="Report list">
+  {% for p in pairs %}
+  <a class="btn btn-muted" href="{{ url_for('reports.view_report', stem=p.stem) }}">{{ p.label }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
+{% endblock %}

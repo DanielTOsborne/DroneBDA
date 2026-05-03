@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Test report — DroneBDA server{% endblock %}
+{% block body %}
+<p class="crumb"><a href="{{ url_for('home') }}">Home</a> / Test report</p>
+<h1>Test report</h1>
+<p class="lede">Runs <code>report.py</code> with the working directory set to <code>{{ reporting_dir }}</code>, so <code>import amr</code> matches how you would run <code>cd Output Reporting</code> then <code>python report.py</code> on the Pi or your PC.</p>
+<form method="post" action="{{ url_for('test_report.run') }}" class="report-toolbar">
+  <button type="submit" class="btn btn-primary">Generate sample report</button>
+</form>
+<p class="meta">This uses the sample craters in <code>report.py</code>’s <code>__main__</code> block and writes into <code>Output Reporting/Reports/</code> (then open <a href="{{ url_for('reports.index') }}">Reports</a>).</p>
+{% endblock %}

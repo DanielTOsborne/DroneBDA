@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Clear reports — done{% endblock %}
+{% block body %}
+<p class="crumb"><a href="{{ url_for('home') }}">Home</a> / <a href="{{ url_for('clear_reports.index') }}">Clear reports</a> / Result</p>
+<h1>Clear reports — done</h1>
+<p class="meta">Folder: <code>{{ reports_dir }}</code></p>
+{% if deleted %}
+<p class="lede">Deleted <strong>{{ deleted|length }}</strong> file(s).</p>
+<ul class="file-chop-list">
+  {% for name in deleted %}
+  <li><code>{{ name }}</code></li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="lede">Nothing was deleted (no matching files or all deletes failed).</p>
+{% endif %}
+{% if errors %}
+<h2 class="subh">Errors</h2>
+<ul class="file-chop-list">
+  {% for e in errors %}
+  <li>{{ e }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+<div class="report-toolbar">
+  <a class="btn btn-primary btn-sm" href="{{ url_for('reports.index') }}">Reports</a>
+  <a class="btn btn-muted btn-sm" href="{{ url_for('home') }}">Hub</a>
+</div>
+{% endblock %}
