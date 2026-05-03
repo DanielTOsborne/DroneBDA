@@ -6,7 +6,9 @@ Generated Markdown and DD2768 PDF land in ``Output Reporting/Reports/``.
 
 from __future__ import annotations
 
+import contextlib
 import math
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from enum import IntEnum
@@ -508,6 +510,36 @@ def _edge_device_report_stub(markdown: str, filename: str) -> None:
     print(f"[EDGE_DEVICE / Pi stub] would write {n_bytes} UTF-8 bytes to SD as {filename!r}")
 
 
+@contextlib.contextmanager
+def _cwd_output_reporting():
+    """``import amr`` in ``write_report_markdown`` expects cwd under ``Output Reporting/``."""
+    prev = os.getcwd()
+    os.chdir(Path(__file__).resolve().parent)
+    try:
+        yield
+    finally:
+        os.chdir(prev)
+
+
+def generate_bom_from_pointcloud_csv(
+    csv_path: str | Path,
+    *,
+    runway_heading: float = 45.0,
+) -> Path | None:
+    """
+    Load craters from a LiDAR CSV (absolute path or path under repo root), write BoM markdown
+    and optional DD2768 PDF. Restores process cwd after the call.
+    """
+    from crater_pipeline import load_report_craters_from_pointcloud_csv
+
+    with _cwd_output_reporting():
+        craters = load_report_craters_from_pointcloud_csv(
+            csv_path,
+            runway_heading=runway_heading,
+        )
+        return write_report_markdown(craters)
+
+
 def write_report_markdown(
     craters: list[Crater],
     path: str | Path | None = None,
@@ -548,10 +580,29 @@ def write_report_markdown(
 
 
 if __name__ == "__main__":
-    sample = [
-        Crater("001", 193.0, 176.5, 70.0, 37.7962, -122.3942),
-        Crater("002", 170.2, 167.6, 73.7, 37.7970, -122.3950, image_path=None),
-    ]
+    _repo = Path(__file__).resolve().parent.parent
+    _scenario_b = _repo / "scenario_B_points.csv"
+    sample: list[Crater]
+    if _scenario_b.is_file():
+        try:
+            from crater_pipeline import load_report_craters_from_pointcloud_csv
+
+            sample = load_report_craters_from_pointcloud_csv(
+                _scenario_b,
+                runway_heading=45.0,
+            )
+            print(f"Loaded {len(sample)} crater(s) from {_scenario_b.as_posix()}")
+        except Exception as exc:  # noqa: BLE001 — demo fallback
+            print(f"Point-cloud crater load failed ({exc!r}); using hardcoded sample craters.")
+            sample = [
+                Crater("001", 193.0, 176.5, 70.0, 37.7962, -122.3942),
+                Crater("002", 170.2, 167.6, 73.7, 37.7970, -122.3950, image_path=None),
+            ]
+    else:
+        sample = [
+            Crater("001", 193.0, 176.5, 70.0, 37.7962, -122.3942),
+            Crater("002", 170.2, 167.6, 73.7, 37.7970, -122.3950, image_path=None),
+        ]
     out = render_report(sample)
     print(out)
     written = write_report_markdown(sample)
