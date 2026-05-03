@@ -354,6 +354,10 @@ paket-files/
 **/__pycache__/
 *.pyc
 
+# Local venv (e.g. Raspberry Pi OS / PEP 668 — use: python3 -m venv .venv)
+.venv/
+venv/
+
 # Cake - Uncomment if you are using it
 #tools/**
 #!tools/packages.config

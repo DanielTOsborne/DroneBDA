@@ -1,5 +1,5 @@
-"""DroneBDA Pi file browser and feature hub."""
+"""DroneBDA Pi file browser and feature hub.
 
-from Server.app import create_app
-
-__all__ = ["create_app"]
+Import ``create_app`` from ``Server.app`` (not here) so ``python -m Server.run`` can
+bootstrap the venv before Flask is loaded.
+"""
