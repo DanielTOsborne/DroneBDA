@@ -10,11 +10,11 @@ const uint8_t I2C_ADDRESS = 15;
 
 // Calibration and Kalman tuning. Increase measurement noise for smoother output;
 // increase process noise for faster response to real motion.
-const int CALIBRATION_SAMPLES = 1000;
-const float DEFAULT_SAMPLE_DT_SECONDS = 0.01f;
+const int CALIBRATION_SAMPLES = 2000;
+const float DEFAULT_SAMPLE_DT_SECONDS = 0.02f;
 const float ACCEL_PROCESS_NOISE = 0.08f;
-const float ACCEL_MEASUREMENT_NOISE = 0.45f;
-const float GYRO_PROCESS_NOISE = 0.02f;
+const float ACCEL_MEASUREMENT_NOISE = 0.37f;
+const float GYRO_PROCESS_NOISE = 0.06f;
 const float GYRO_MEASUREMENT_NOISE = 0.08f;
 const float DISTANCE_PROCESS_NOISE = 2.0f;
 const float DISTANCE_MEASUREMENT_NOISE = 20.0f;
