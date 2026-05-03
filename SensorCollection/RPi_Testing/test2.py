@@ -30,7 +30,7 @@ class ArduinoSensorReader:
         try:
             # Send command 0x01 to request acceleration data
             self.bus.write_byte(self.arduino_address, 0x01)
-            time.sleep(0.01)  # Small delay for Arduino to process
+            time.sleep(0.05)  # Small delay for Arduino to process
 
             # Read 12 bytes (3 floats)
             data = self.bus.read_i2c_block_data(self.arduino_address, 0x01, 12)
@@ -53,7 +53,7 @@ class ArduinoSensorReader:
         try:
             # Send command 0x02 to request gyroscope data
             self.bus.write_byte(self.arduino_address, 0x02)
-            time.sleep(0.01)  # Small delay for Arduino to process
+            time.sleep(0.05)  # Small delay for Arduino to process
 
             # Read 12 bytes (3 floats)
             data = self.bus.read_i2c_block_data(self.arduino_address, 0x02, 12)
@@ -76,7 +76,7 @@ class ArduinoSensorReader:
         try:
             # Send command 0x03 to request distance sensor data
             self.bus.write_byte(self.arduino_address, 0x03)
-            time.sleep(0.01)  # Small delay for Arduino to process
+            time.sleep(0.05)  # Small delay for Arduino to process
 
             # Read 6 bytes (3 shorts/int16)
             data = self.bus.read_i2c_block_data(self.arduino_address, 0x03, 6)
