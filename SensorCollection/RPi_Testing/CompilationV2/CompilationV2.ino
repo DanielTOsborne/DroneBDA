@@ -10,7 +10,6 @@ Adafruit_MPU6050 mpu;
 float calibration_gx, calibration_gy, calibration_gz;
 float calibration_ax, calibration_ay, calibration_az;
 float accel_offset_x, accel_offset_y, accel_offset_z;
-float accel_scale;
 int calibration_count;
 
 // Setup TFminiS device
@@ -52,7 +51,6 @@ void setup() {
   accel_offset_x = 0;
   accel_offset_y = 0;
   accel_offset_z = 0;
-  accel_scale = 1.0;
 }
 
 struct myIMU {
@@ -101,27 +99,18 @@ void loop() {
     accel_offset_y = avg_ay;
     accel_offset_z = avg_az - 9.81;
 
-    float avg_norm = sqrt(avg_ax * avg_ax + avg_ay * avg_ay + avg_az * avg_az);
-    if (avg_norm > 0.001) {
-      accel_scale = 9.81 / avg_norm;
-    } else {
-      accel_scale = 1.0;
-    }
-
     Serial.print("Accel offset: ");
     Serial.print(accel_offset_x, 4);
     Serial.print(", ");
     Serial.print(accel_offset_y, 4);
     Serial.print(", ");
     Serial.println(accel_offset_z, 4);
-    Serial.print("Accel scale: ");
-    Serial.println(accel_scale, 6);
 
     calibration_count += 1;
   } else {
-    updatedBuffer.ax = (a.acceleration.x - accel_offset_x) * accel_scale;
-    updatedBuffer.ay = (a.acceleration.y - accel_offset_y) * accel_scale;
-    updatedBuffer.az = (a.acceleration.z - accel_offset_z) * accel_scale;
+    updatedBuffer.ax = a.acceleration.x - accel_offset_x;
+    updatedBuffer.ay = a.acceleration.y - accel_offset_y;
+    updatedBuffer.az = a.acceleration.z - accel_offset_z;
     updatedBuffer.gx = (g.gyro.x - calibration_gx);
     updatedBuffer.gy = (g.gyro.y - calibration_gy);
     updatedBuffer.gz = (g.gyro.z - calibration_gz);

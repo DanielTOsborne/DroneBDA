@@ -148,6 +148,7 @@ def main(output_file='sensor_data.csv', interval=0.25):
         try:
             print("Starting sensor readings... Press Ctrl+C to stop.\n")
             next_time = time.perf_counter()
+            sample_count = 0
 
             while True:
                 cycle_start = time.perf_counter()
@@ -169,6 +170,13 @@ def main(output_file='sensor_data.csv', interval=0.25):
                 writer.writerow(row)
                 csvfile.flush()
 
+                if sample_count < 50:
+                    print(f"[{sample_count + 1:02d}] {timestamp} | "
+                          f"ax={row['acceleration_x']:.2f} ay={row['acceleration_y']:.2f} az={row['acceleration_z']:.2f} | "
+                          f"gx={row['gyroscope_x']:.2f} gy={row['gyroscope_y']:.2f} gz={row['gyroscope_z']:.2f} | "
+                          f"dist={row['distance']} str={row['strength']} temp={row['temperature']}")
+
+                sample_count += 1
                 elapsed = time.perf_counter() - cycle_start
                 next_time += interval
                 sleep_time = next_time - time.perf_counter()
