@@ -9,15 +9,16 @@ import csv
 import smbus
 import time
 import struct
+import math
 from datetime import datetime
 
 
-def format_float(value):
-    return '' if value is None else f"{value:.2f}"
+def format_terminal_float(value):
+    if value is None:
+        return ''
 
-
-def format_value(value):
-    return '' if value is None else value
+    truncated = math.trunc(value * 100) / 100
+    return f"{truncated:.2f}"
 
 
 class ArduinoSensorReader:
@@ -162,25 +163,29 @@ def main(output_file='sensor_data.csv', interval=0.25):
                 sample_number = sample_count + 1
 
                 row = {
-                    'sample_count': f"{sample_number:02d}",
+                    'sample_count': sample_number,
                     'timestamp': timestamp,
-                    'acceleration_x': format_float(readings.get('acceleration_x')),
-                    'acceleration_y': format_float(readings.get('acceleration_y')),
-                    'acceleration_z': format_float(readings.get('acceleration_z')),
-                    'gyroscope_x': format_float(readings.get('gyroscope_x')),
-                    'gyroscope_y': format_float(readings.get('gyroscope_y')),
-                    'gyroscope_z': format_float(readings.get('gyroscope_z')),
-                    'distance': format_value(readings.get('distance')),
-                    'strength': format_value(readings.get('strength')),
-                    'temperature': format_value(readings.get('temperature')),
+                    'acceleration_x': readings.get('acceleration_x'),
+                    'acceleration_y': readings.get('acceleration_y'),
+                    'acceleration_z': readings.get('acceleration_z'),
+                    'gyroscope_x': readings.get('gyroscope_x'),
+                    'gyroscope_y': readings.get('gyroscope_y'),
+                    'gyroscope_z': readings.get('gyroscope_z'),
+                    'distance': readings.get('distance'),
+                    'strength': readings.get('strength'),
+                    'temperature': readings.get('temperature'),
                 }
                 writer.writerow(row)
                 csvfile.flush()
 
                 if sample_count < 50:
                     print(f"[{sample_number:02d}] {timestamp} | "
-                          f"ax={row['acceleration_x']} ay={row['acceleration_y']} az={row['acceleration_z']} | "
-                          f"gx={row['gyroscope_x']} gy={row['gyroscope_y']} gz={row['gyroscope_z']} | "
+                          f"ax={format_terminal_float(row['acceleration_x'])} "
+                          f"ay={format_terminal_float(row['acceleration_y'])} "
+                          f"az={format_terminal_float(row['acceleration_z'])} | "
+                          f"gx={format_terminal_float(row['gyroscope_x'])} "
+                          f"gy={format_terminal_float(row['gyroscope_y'])} "
+                          f"gz={format_terminal_float(row['gyroscope_z'])} | "
                           f"dist={row['distance']} str={row['strength']} temp={row['temperature']}")
 
                 sample_count += 1
