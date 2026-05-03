@@ -170,6 +170,10 @@ def main(output_file='sensor_data.csv', interval=0.25):
                     'strength': readings.get('strength'),
                     'temperature': readings.get('temperature'),
                 }
+                # Round float values to 2 decimals to match terminal output
+                for key in ['acceleration_x', 'acceleration_y', 'acceleration_z', 'gyroscope_x', 'gyroscope_y', 'gyroscope_z']:
+                    if row[key] is not None:
+                        row[key] = round(row[key], 2)
                 writer.writerow(row)
                 csvfile.flush()
 
