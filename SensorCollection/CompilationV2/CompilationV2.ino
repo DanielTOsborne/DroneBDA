@@ -17,7 +17,7 @@ TFminiS tfmini(tfSerial);
 void setup() {
   Serial.begin(115200);
 
-  Wire.begin(5);
+  Wire.begin(15);
   Wire.onReceive(receiveHandler);
   Wire.onRequest(requestHandler);
   
@@ -47,8 +47,13 @@ double calibrate(double raw_val, double cal_max, double cal_min){
   return (((raw_val - cal_min) * (9.81 - (-9.81))) / (cal_max - cal_min)) + -9.81;
 }
 
-double ax, ay, az, gx, gy, gz;
-int dis, str, tem;
+struct IMUData {
+  double ax, ay, az;
+  double gx, gy, gz;
+  int dis, str, tem;
+};
+
+volatile IMUData sensorBuffer;
 
 void loop() {
   tfmini.readSensor();
@@ -73,28 +78,35 @@ void loop() {
     calibration_count += 1;
   } else {
     /* Record the values */
-    ax = calibrate(a.acceleration.x, 9.8, -9.61);
-    ay = calibrate(a.acceleration.y, 9.86, -9.85);
-    az = calibrate(a.acceleration.z, 10.9, -8.8);
-    gx = (g.gyro.x - calibration_gx);
-    gy = (g.gyro.y - calibration_gy);
-    gz = (g.gyro.z - calibration_gz);
+    sensorBuffer.ax = calibrate(a.acceleration.x, 9.8, -9.61);
+    sensorBuffer.ay = calibrate(a.acceleration.y, 9.86, -9.85);
+    sensorBuffer.az = calibrate(a.acceleration.z, 10.9, -8.8);
+    sensorBuffer.gx = (g.gyro.x - calibration_gx);
+    sensorBuffer.gy = (g.gyro.y - calibration_gy);
+    sensorBuffer.gz = (g.gyro.z - calibration_gz);
   }
   if (distance >= 0) {
-    dis = distance;
-    str = strength;
-    tem = temperature;
+    sensorBuffer.dis = distance;
+    sensorBuffer.str = strength;
+    sensorBuffer.tem = temperature;
   }
 }
 
+volatile byte currentCommand;
 
 void receiveHandler(int x){
   while(Wire.available()){
-    char c = Wire.read();
-    Serial.print(c);
+    currentCommand = Wire.read();
   }
 }
 
 void requestHandler(){
-  Wire.write("Hello, World!");
+  if(currentCommand == 0x01){
+    Wire.write((byte*)&sensorBuffer.ax,24);
+  } else if(currentCommand == 0x02){
+    Wire.write((byte*)&sensorBuffer.gx,24);  
+  } else if(currentCommand == 0x03){
+    Wire.write((byte*)&sensorBuffer.dis,6);
+  }
+  
 }
