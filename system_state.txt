@@ -1,2 +1,3 @@
-current state=standby
+current state=dataComplete
 restartState=false
+start position=37.7962,-122.3944

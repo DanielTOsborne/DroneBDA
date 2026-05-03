@@ -4,7 +4,13 @@
 <p class="crumb"><a href="{{ url_for('home') }}">Home</a> / Start BDA</p>
 <h1>Start BDA</h1>
 <p class="meta">System file: <code>current state</code> = <strong>{{ current_state }}</strong>,
-  <code>restartState</code> = <strong>{{ 'true' if restart_state else 'false' }}</strong></p>
+  <code>restartState</code> = <strong>{{ 'true' if restart_state else 'false' }}</strong>,
+  <code>start position</code> =
+  {% if start_position_value %}
+  <code class="mono-inline">{{ start_position_value }}</code>
+  {% else %}
+  <span class="meta">(empty)</span>
+  {% endif %}</p>
 {% if complete %}
 <h2 class="subh">First pass result</h2>
 <p class="lede">Imaging reports <code>cameraComplete</code>. Review the first-pass frame, then accept to continue.</p>
@@ -49,9 +55,18 @@
 </div>
 {% elif show_start %}
 <p class="lede">Begin the damage-assessment flow: set state to <code>cameraScan</code> so onboard camera work can run its first pass.</p>
-<form method="post" action="{{ url_for('start_bda.run') }}" class="report-toolbar">
-  <button type="submit" class="btn btn-muted">Start BDA</button>
-  <a class="btn btn-primary btn-sm" href="{{ url_for('home') }}">Cancel</a>
+<p class="meta">If GPS has no fix, enter a manual start point in <strong>decimal degrees</strong> (WGS84). Both fields must be filled to save a value; leave both blank to write an empty <code>start position</code> line.</p>
+<form method="post" action="{{ url_for('start_bda.run') }}" class="start-flow-form">
+  <div class="coord-pair">
+    <label for="latitude">Latitude</label>
+    <input id="latitude" name="latitude" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. 37.7962" value="{{ latitude_value }}">
+    <label for="longitude">Longitude</label>
+    <input id="longitude" name="longitude" type="text" inputmode="decimal" autocomplete="off" placeholder="e.g. -122.3942" value="{{ longitude_value }}">
+  </div>
+  <div class="report-toolbar">
+    <button type="submit" class="btn btn-muted">Start BDA</button>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('home') }}">Cancel</a>
+  </div>
 </form>
 {% else %}
 <p class="lede meta">State <code>{{ current_state }}</code> — no action defined on this page yet.</p>

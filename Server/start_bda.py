@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from flask import Blueprint, abort, redirect, render_template, send_file, url_for
+from flask import Blueprint, abort, redirect, render_template, request, send_file, url_for
 
 from Server.config import get_repo_root
 from Server.system_state import DEFAULT_CURRENT, read_state, write_state
@@ -49,9 +49,19 @@ def first_pass_image_url() -> str | None:
     return url_for("start_bda.first_pass_image")
 
 
+def _split_lat_lon(start_position: str) -> tuple[str, str]:
+    s = (start_position or "").strip()
+    if not s:
+        return "", ""
+    if "," in s:
+        lat, _, rest = s.partition(",")
+        return lat.strip(), rest.strip()
+    return s, ""
+
+
 @bp.route("/")
 def index():
-    current, restart = read_state()
+    current, restart, start_position = read_state()
     scanning = current == STATE_SCAN
     complete = current == STATE_COMPLETE
     moving = current == STATE_MOVE
@@ -68,10 +78,14 @@ def index():
         STATE_DATA_COMPLETE,
     )
     admin_next = _ADMIN_SIMULATE_NEXT.get(current)
+    lat_val, lon_val = _split_lat_lon(start_position)
     return render_template(
         "start_bda.html",
         current_state=current,
         restart_state=restart,
+        start_position_value=start_position,
+        latitude_value=lat_val,
+        longitude_value=lon_val,
         scanning=scanning,
         complete=complete,
         moving=moving,
@@ -100,14 +114,17 @@ def first_pass_image():
 
 @bp.route("/run", methods=["POST"])
 def run():
-    _, restart = read_state()
-    write_state(STATE_SCAN, restart=restart)
+    _, restart, _ = read_state()
+    lat = request.form.get("latitude", "").strip()
+    lon = request.form.get("longitude", "").strip()
+    start_position = f"{lat},{lon}" if lat and lon else ""
+    write_state(STATE_SCAN, restart=restart, start_position=start_position)
     return redirect(url_for("start_bda.index"))
 
 
 @bp.route("/admin-proceed", methods=["POST"])
 def admin_proceed():
-    current, restart = read_state()
+    current, restart, _ = read_state()
     next_state = _ADMIN_SIMULATE_NEXT.get(current)
     if next_state is None:
         abort(400)
@@ -118,7 +135,7 @@ def admin_proceed():
 @bp.route("/override-location", methods=["POST"])
 def override_location():
     """Manual placement: from ``moveToPoint`` go straight to ``cloudScan`` (same as autonomous arrival)."""
-    current, restart = read_state()
+    current, restart, _ = read_state()
     if current != STATE_MOVE:
         abort(400)
     write_state(STATE_CLOUD, restart=restart)
@@ -128,7 +145,7 @@ def override_location():
 @bp.route("/done-collecting", methods=["POST"])
 def done_collecting():
     """LiDAR collection finished manually; same end state as autonomous pipeline (``cloudComplete``)."""
-    current, restart = read_state()
+    current, restart, _ = read_state()
     if current != STATE_CLOUD:
         abort(400)
     write_state(STATE_CLOUD_COMPLETE, restart=restart)
@@ -137,7 +154,7 @@ def done_collecting():
 
 @bp.route("/accept", methods=["POST"])
 def accept():
-    current, restart = read_state()
+    current, restart, _ = read_state()
     if current != STATE_COMPLETE:
         abort(400)
     write_state(STATE_MOVE, restart=restart)

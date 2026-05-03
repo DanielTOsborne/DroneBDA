@@ -419,3 +419,36 @@ code {
   padding-top: 1.25rem;
   border-top: 1px dashed var(--border);
 }
+
+.start-flow-form {
+  max-width: 22rem;
+  margin-bottom: 1rem;
+}
+
+.coord-pair {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.coord-pair label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.coord-pair input[type="text"] {
+  width: 100%;
+  max-width: 20rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.mono-inline {
+  font-size: 0.85rem;
+}
