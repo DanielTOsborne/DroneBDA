@@ -103,9 +103,10 @@ void receiveHandler(int x){
 
 void requestHandler(){
   if(currentCommand == 0x01){
-    Wire.write((byte*)&sensorBuffer.ax,12);
+    //Wire.write((byte*)&sensorBuffer.ax,16);
+    Wire.write((byte*)&sensorBuffer.ax, 4);
   } else if(currentCommand == 0x02){
-    Wire.write((byte*)&sensorBuffer.gx,12);  
+    Wire.write((byte*)&sensorBuffer.gx,16);  
   } else if(currentCommand == 0x03){
     Wire.write((byte*)&sensorBuffer.dis,6);
   }
