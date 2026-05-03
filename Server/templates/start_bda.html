@@ -12,14 +12,14 @@
   <span class="meta">(empty)</span>
   {% endif %}</p>
 {% if complete %}
-<h2 class="subh">First pass result</h2>
-<p class="lede">Imaging reports <code>cameraComplete</code>. Review the first-pass frame, then accept to continue.</p>
+<h2 class="subh">Annotated map</h2>
+<p class="lede">Imaging reports <code>cameraComplete</code>. Review the annotated map, then accept to continue.</p>
 {% if first_pass_url %}
 <figure class="first-pass-wrap">
-  <img class="first-pass-img" src="{{ first_pass_url }}" alt="First pass preview">
+  <img class="first-pass-img" src="{{ first_pass_url }}" alt="Annotated map from camera scan">
 </figure>
 {% elif first_pass_missing %}
-<p class="lede meta">No <code>firstPass.jpg</code> / <code>.jpeg</code> / <code>.png</code> found at repo root yet. Drop the file there and refresh.</p>
+<p class="lede meta">No <code>camera/map/annotated_map.png</code> at repo root yet. Add the file there and refresh.</p>
 {% endif %}
 <form method="post" action="{{ url_for('start_bda.accept') }}" class="report-toolbar">
   <button type="submit" class="btn btn-muted">Accept</button>
@@ -37,20 +37,11 @@
   <a class="btn btn-muted btn-sm" href="{{ url_for('home') }}">Hub</a>
 </div>
 {% elif cloud_scan %}
-<p class="lede scan-banner">State is <code>cloudScan</code>. The drone is conducting <strong>LiDAR scans</strong> (point cloud). Wait for the system to set <code>cloudComplete</code> when collection finishes—or if collection stopped manually, use <strong>Done Collecting</strong>.</p>
+<p class="lede scan-banner">State is <code>cloudScan</code>. The drone is conducting <strong>LiDAR scans</strong> (point cloud). When collection finishes, place <code>pointcloud.csv</code> at the repo root (or rely on demo <code>scenario_B_points.csv</code>), then use <strong>Done Collecting</strong> to generate the BoM, return to <code>standby</code>, and open the new report.</p>
 <div class="report-toolbar">
   <form method="post" action="{{ url_for('start_bda.done_collecting') }}" class="inline-form-row">
     <button type="submit" class="btn btn-primary">Done Collecting</button>
   </form>
-  <a class="btn btn-muted btn-sm" href="{{ url_for('home') }}">Hub</a>
-</div>
-{% elif cloud_complete %}
-<p class="lede scan-banner">State is <code>cloudComplete</code>. LiDAR collection is done. Wait for <code>dataComplete</code> when sensor data is ready for BoM and reporting.</p>
-<a class="btn btn-muted btn-sm" href="{{ url_for('home') }}">Hub</a>
-{% elif data_complete %}
-<p class="lede scan-banner">State is <code>dataComplete</code>. BoM and reporting are meant to trigger from this state (not wired to live data yet). Use <a href="{{ url_for('reports.index') }}">Reports</a> manually for now.</p>
-<div class="report-toolbar">
-  <a class="btn btn-primary btn-sm" href="{{ url_for('reports.index') }}">Reports</a>
   <a class="btn btn-muted btn-sm" href="{{ url_for('home') }}">Hub</a>
 </div>
 {% elif show_start %}
@@ -75,7 +66,11 @@
 {% if admin_next %}
 <section class="admin-tools" aria-label="Temporary admin testing">
   <h2 class="subh">Admin (testing)</h2>
+  {% if cloud_scan %}
+  <p class="meta">From <code>cloudScan</code>, this matches <strong>Done Collecting</strong>: run BoM from <code>pointcloud.csv</code> at repo root (or demo fallback), set <code>standby</code>, then open the new report.</p>
+  {% else %}
   <p class="meta">Simulate the next teammate step: advance to <code>{{ admin_next }}</code>. Remove this block once real automation drives the file.</p>
+  {% endif %}
   <form method="post" action="{{ url_for('start_bda.admin_proceed') }}" class="report-toolbar">
     <button type="submit" class="btn btn-outline">Admin proceed</button>
   </form>

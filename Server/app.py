@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from flask import Flask, render_template
@@ -22,6 +23,8 @@ def create_app() -> Flask:
         template_folder=str(here / "templates"),
         static_folder=str(here / "static"),
     )
+    # Needed for ``flash()`` after BoM generation (override in production).
+    app.secret_key = os.environ.get("DRONEBDA_FLASK_SECRET", "dronebda-demo-not-for-production")
 
     ensure_default_state_file()
 

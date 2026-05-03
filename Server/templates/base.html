@@ -11,6 +11,15 @@
     <a href="{{ url_for('home') }}" class="brand">DroneBDA</a>
   </header>
   <main class="wrap">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash-msgs" role="status">
+          {% for msg in messages %}
+            <p class="lede scan-banner">{{ msg }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
     {% block body %}{% endblock %}
   </main>
 </body>
