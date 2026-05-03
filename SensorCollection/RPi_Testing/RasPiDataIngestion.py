@@ -97,9 +97,9 @@ class ArduinoSensorReader:
 
         accel = self.read_acceleration()
         if accel is not None:
-            readings['acceleration_x'] = accel[0]
+            readings['acceleration_x'] = accel[2]
             readings['acceleration_y'] = accel[1]
-            readings['acceleration_z'] = accel[2]
+            readings['acceleration_z'] = accel[0]
 
         gyro = self.read_gyroscope()
         if gyro is not None:
