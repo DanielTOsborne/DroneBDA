@@ -80,7 +80,7 @@ def distance_between_parallel_lines(rho1, rho2):
 	"""Distance between two parallel lines in pixels."""
 	return abs(rho1 - rho2)
 
-def find_parallel_lines(lines, angle_tolerance_deg=2, min_distance=200):
+def find_parallel_lines(lines, angle_tolerance_deg=2, min_distance=200, max_distance=1000):
 	"""Find all pairs of parallel lines and their distances."""
 	parallels = []
 	if lines is None:
@@ -93,7 +93,7 @@ def find_parallel_lines(lines, angle_tolerance_deg=2, min_distance=200):
 			rho2, theta2 = lines[j]
 			if are_parallel(theta1, theta2, angle_tolerance_deg):
 				dist = distance_between_parallel_lines(rho1, rho2)
-				if dist > min_distance:
+				if dist > min_distance and dist < max_distance:
 					parallels.append(((rho1, theta1), (rho2, theta2), dist))
 	return parallels
 
