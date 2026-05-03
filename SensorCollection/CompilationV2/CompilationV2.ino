@@ -48,13 +48,9 @@ float calibrate(float raw_val, float cal_max, float cal_min){
   return (((raw_val - cal_min) * (9.81 - (-9.81))) / (cal_max - cal_min)) + -9.81;
 }
 
-struct IMUData {
-  float ax, ay, az;
-  float gx, gy, gz;
-  int dis, str, tem;
-};
-
-volatile IMUData sensorBuffer;
+float ax, ay, az;
+float gx, gy, gz;
+int dis, str, tem;
 
 void loop() {
   tfmini.readSensor();
@@ -79,17 +75,17 @@ void loop() {
     calibration_count += 1;
   } else {
     /* Record the values */
-    sensorBuffer.ax = calibrate(a.acceleration.x, 9.8, -9.61);
-    sensorBuffer.ay = calibrate(a.acceleration.y, 9.86, -9.85);
-    sensorBuffer.az = calibrate(a.acceleration.z, 10.9, -8.8);
-    sensorBuffer.gx = (g.gyro.x - calibration_gx);
-    sensorBuffer.gy = (g.gyro.y - calibration_gy);
-    sensorBuffer.gz = (g.gyro.z - calibration_gz);
+    ax = calibrate(a.acceleration.x, 9.8, -9.61);
+    ay = calibrate(a.acceleration.y, 9.86, -9.85);
+    az = calibrate(a.acceleration.z, 10.9, -8.8);
+    gx = (g.gyro.x - calibration_gx);
+    gy = (g.gyro.y - calibration_gy);
+    gz = (g.gyro.z - calibration_gz);
   }
   if (distance >= 0) {
-    sensorBuffer.dis = distance;
-    sensorBuffer.str = strength;
-    sensorBuffer.tem = temperature;
+    dis = distance;
+    str = strength;
+    tem = temperature;
   }
 }
 
@@ -104,11 +100,13 @@ void receiveHandler(int x){
 void requestHandler(){
   if(currentCommand == 0x01){
     //Wire.write((byte*)&sensorBuffer.ax,16);
-    Wire.write((byte*)&sensorBuffer.ax, 4);
+    //Wire.write((byte*)&sensorBuffer.ax, 4);
+    //float a = sensorBuffer.ax;
+    Wire.write((byte*)&ax, 4);
   } else if(currentCommand == 0x02){
-    Wire.write((byte*)&sensorBuffer.gx,16);  
+    //Wire.write((byte*)&sensorBuffer.gx,16);  
   } else if(currentCommand == 0x03){
-    Wire.write((byte*)&sensorBuffer.dis,6);
+    //Wire.write((byte*)&sensorBuffer.dis,6);
   }
   
 }
