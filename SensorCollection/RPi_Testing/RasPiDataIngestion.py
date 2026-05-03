@@ -4,9 +4,12 @@ Raspberry Pi I2C Sensor Reader for Arduino Sensor Collection
 Reads accelerometer, gyroscope, and distance sensor data from Arduino via I2C
 """
 
+import argparse
+import csv
 import smbus
 import time
 import struct
+from datetime import datetime
 
 class ArduinoSensorReader:
     def __init__(self, bus_number=1, arduino_address=0x0F, max_retries=3, retry_delay=0.1):
@@ -117,50 +120,89 @@ class ArduinoSensorReader:
         self.bus.close()
 
 
-def main():
-    """Main function to demonstrate sensor reading"""
+def main(output_file='sensor_data.csv', interval=0.25):
+    """Main function to perform timestamped sensor ingestion into CSV."""
     print("Arduino Sensor Reader for Raspberry Pi")
     print("=======================================")
+    print(f"Logging sensor data to {output_file} every {interval:.2f} seconds.")
 
     # Initialize sensor reader
     reader = ArduinoSensorReader()
+    fieldnames = [
+        'timestamp',
+        'acceleration_x',
+        'acceleration_y',
+        'acceleration_z',
+        'gyroscope_x',
+        'gyroscope_y',
+        'gyroscope_z',
+        'distance',
+        'strength',
+        'temperature',
+    ]
 
-    try:
-        print("Starting sensor readings... Press Ctrl+C to stop.\n")
+    with open(output_file, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
 
-        while True:
-            # Read all sensors
-            readings = reader.read_all_sensors()
+        try:
+            print("Starting sensor readings... Press Ctrl+C to stop.\n")
+            next_time = time.perf_counter()
 
-            # Display readings
-            print("Sensor Readings:")
-            print("-" * 40)
+            while True:
+                cycle_start = time.perf_counter()
+                timestamp = datetime.utcnow().isoformat(timespec='milliseconds') + 'Z'
+                readings = reader.read_all_sensors()
 
-            if 'acceleration_x' in readings:
-                print(f"Acceleration X: {readings['acceleration_x']:.2f} m/s²")
-                print(f"Acceleration Y: {readings['acceleration_y']:.2f} m/s²")
-                print(f"Acceleration Z: {readings['acceleration_z']:.2f} m/s²")
+                row = {
+                    'timestamp': timestamp,
+                    'acceleration_x': readings.get('acceleration_x'),
+                    'acceleration_y': readings.get('acceleration_y'),
+                    'acceleration_z': readings.get('acceleration_z'),
+                    'gyroscope_x': readings.get('gyroscope_x'),
+                    'gyroscope_y': readings.get('gyroscope_y'),
+                    'gyroscope_z': readings.get('gyroscope_z'),
+                    'distance': readings.get('distance'),
+                    'strength': readings.get('strength'),
+                    'temperature': readings.get('temperature'),
+                }
+                writer.writerow(row)
+                csvfile.flush()
 
-            if 'gyroscope_x' in readings:
-                print(f"Gyroscope X: {readings['gyroscope_x']:.2f} °/s")
-                print(f"Gyroscope Y: {readings['gyroscope_y']:.2f} °/s")
-                print(f"Gyroscope Z: {readings['gyroscope_z']:.2f} °/s")
+                elapsed = time.perf_counter() - cycle_start
+                next_time += interval
+                sleep_time = next_time - time.perf_counter()
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
+                else:
+                    next_time = time.perf_counter()
 
-            if 'distance' in readings:
-                print(f"Distance: {readings['distance']} cm")
-                print(f"Strength: {readings['strength']}")
-                print(f"Temperature: {readings['temperature']}°C")
+        except KeyboardInterrupt:
+            print("\nStopping sensor readings...")
 
-            print()  # Empty line
-            time.sleep(1)  # Read every second
-
-    except KeyboardInterrupt:
-        print("\nStopping sensor readings...")
-
-    finally:
-        reader.close()
-        print("I2C connection closed.")
+        finally:
+            reader.close()
+            print("I2C connection closed.")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description='Read sensor data from the Arduino over I2C and log it to CSV'
+    )
+    parser.add_argument(
+        '-o', '--output',
+        default='sensor_data.csv',
+        help='Output CSV filename (default: sensor_data.csv)'
+    )
+    parser.add_argument(
+        '-i', '--interval',
+        type=float,
+        default=0.25,
+        help='Minimum polling interval in seconds (default: 0.25)'
+    )
+    args = parser.parse_args()
+
+    if args.interval <= 0:
+        raise SystemExit('Interval must be a positive number')
+
+    main(output_file=args.output, interval=args.interval)
