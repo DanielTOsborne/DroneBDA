@@ -15,6 +15,8 @@ int calibration_count;
 TFminiS tfmini(tfSerial);
 
 void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+
   Serial.begin(115200);
 
   Wire.setTimeout(1000, true);
@@ -52,7 +54,7 @@ struct myIMU {
   float gx, gy, gz;
   int16_t dis, str, tem;
 };
-
+int ledState = LOW;
 myIMU sensorBuffer;
 
 void loop() {
@@ -68,6 +70,15 @@ void loop() {
   myIMU updatedBuffer = sensorBuffer;
 
   if (calibration_count < 1000) {
+    if (calibration_count % 100 == 0){
+      if (ledState == LOW) {
+        ledState = HIGH;
+      } else {
+        ledState = LOW;
+      }
+      digitalWrite(LED_BUILTIN, ledState);
+    }
+
     calibration_gx += g.gyro.x;
     calibration_gy += g.gyro.y;
     calibration_gz += g.gyro.z;
