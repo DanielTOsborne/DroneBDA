@@ -7,7 +7,7 @@
 // Setup MPU6050
 Adafruit_MPU6050 mpu;
 // Create calibration 
-double calibration_gx, calibration_gy, calibration_gz;
+float calibration_gx, calibration_gy, calibration_gz;
 int calibration_count;
 
 // Setup TFminiS device
@@ -44,13 +44,13 @@ void setup() {
   calibration_gz = 0;
 }
 
-double calibrate(double raw_val, double cal_max, double cal_min){
+float calibrate(float raw_val, float cal_max, float cal_min){
   return (((raw_val - cal_min) * (9.81 - (-9.81))) / (cal_max - cal_min)) + -9.81;
 }
 
 struct IMUData {
-  double ax, ay, az;
-  double gx, gy, gz;
+  float ax, ay, az;
+  float gx, gy, gz;
   int dis, str, tem;
 };
 
@@ -103,9 +103,9 @@ void receiveHandler(int x){
 
 void requestHandler(){
   if(currentCommand == 0x01){
-    Wire.write((byte*)&sensorBuffer.ax,24);
+    Wire.write((byte*)&sensorBuffer.ax,12);
   } else if(currentCommand == 0x02){
-    Wire.write((byte*)&sensorBuffer.gx,24);  
+    Wire.write((byte*)&sensorBuffer.gx,12);  
   } else if(currentCommand == 0x03){
     Wire.write((byte*)&sensorBuffer.dis,6);
   }
