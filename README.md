@@ -1,6 +1,8 @@
-# DroneBDA
+# NATSEC Hackathon:  Team _Crater Be Gone_
+### Drone-based BDA for expeditionary JADR/RADR Operations  
 
-Hackathon prototype: drone-enabled airfield damage assessment (planning-style outputs for a logistics demo).
+
+<br></br>
 
 ## Repo layout
 
