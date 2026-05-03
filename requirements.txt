@@ -1,0 +1,5 @@
+opencv-python>=4.8.0
+mgrs>=1.4.0
+packaging>=23.0
+pypdf>=4.0
+cryptography>=3.1

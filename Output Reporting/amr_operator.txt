@@ -1,0 +1,52 @@
+# Demo DD Form 2768 operator / admin pre-fill (not real PII).
+# Format: alias=value  (see amr.py _PROFILE_TEXT_ALIASES). Lines starting with # ignored.
+
+priority=1
+
+twoA=12QRG
+twoB=EXERCISE EXERCISE EXERCISE // Movement of expeditionary airfield rapid-repair material in support of crater damage response training / assessment. Commercial mode unacceptable within required response window.
+
+threeA=04
+
+six_leg1_A=RKSO 
+six_leg1_B=20260510-2300Z
+six_leg1_C=ZKZZ
+six_leg1_D=20260511-0130Z
+
+nine_departure_A=Support, Robert T
+nine_departure_B=MSgt
+nine_departure_C=DSN 987-1111
+nine_departure_D=Commercial +1-555-0100
+
+nine_arrival_A=Support, Robert T
+nine_arrival_B=MSgt
+nine_arrival_C=DSN 987-1111
+nine_arrival_D=Commercial +1-555-0100
+
+twelveA=Phillips, Felice W
+twelveB=SSG
+twelveC=2/75 RADR Team Lead
+twelveD=WAZ1T0
+twelveE=DSN 987-2222
+twelveG=20260510
+twelveH=6480 Dawson Loop, Fort Benning, GA 31905
+
+thirteenA=Smith, Carol J
+thirteenB=LTC
+thirteenC=REG S4
+thirteenD=WAZ1AA
+thirteenE=DSN 555-0000
+thirteenG=20260510
+
+fourteenA=Demo, Alice R
+fourteenB=MAJ
+fourteenC=2/75 Technical Engineer
+fourteenD=WAZ1AA
+fourteenE=DSN 987-2222
+fourteenG=20260510
+
+seven_leg1=0
+seven_leg2=0
+seven_leg3=0
+seven_passengers=4
+seven_total=0
