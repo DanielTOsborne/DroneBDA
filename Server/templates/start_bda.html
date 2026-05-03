@@ -27,7 +27,24 @@
 </form>
 {% elif scanning %}
 <p class="lede scan-banner">The drone is conducting its <strong>camera imaging pass</strong> (state <code>cameraScan</code>). When imaging finishes, the pipeline should move the state to <code>cameraComplete</code> and write <code>camera/map/annotated_map.png</code>.</p>
+<p class="meta">Checking <code>current state</code> every 2 seconds; the page reloads automatically when it changes.</p>
 <a class="btn btn-muted btn-sm" href="{{ url_for('home') }}">Back to hub</a>
+<script>
+(function () {
+  var pollUrl = {{ url_for('start_bda.state_poll') | tojson }};
+  var initial = {{ current_state | tojson }};
+  var t = setInterval(function () {
+    fetch(pollUrl, { headers: { Accept: 'application/json' }, cache: 'no-store' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || j.current_state === initial) return;
+        clearInterval(t);
+        location.reload();
+      })
+      .catch(function () {});
+  }, 2000);
+})();
+</script>
 {% elif moving %}
 <p class="lede scan-banner">State is <code>moveToPoint</code>. Wait for the system to report <code>cloudScan</code> when the drone has reached the LiDAR scan point—or if you <strong>moved it manually</strong>, use <strong>Override Location</strong> to record that it is in position for LiDAR.</p>
 <div class="report-toolbar">

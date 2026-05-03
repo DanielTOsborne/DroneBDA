@@ -6,7 +6,7 @@ from __future__ import annotations
 
 
 
-from flask import Blueprint, abort, flash, redirect, render_template, request, send_file, url_for
+from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, send_file, url_for
 
 
 
@@ -134,9 +134,11 @@ def _finish_cloud_scan_and_report(restart: bool):
 
     return redirect(url_for("reports.view_report", stem=written.stem))
 
-
-
-
+@bp.route("/state-poll")
+def state_poll():
+    """Lightweight JSON for the Start BDA page while in ``cameraScan`` (2 s polling)."""
+    current, _, _ = read_state()
+    return jsonify(current_state=current)
 
 @bp.route("/")
 
