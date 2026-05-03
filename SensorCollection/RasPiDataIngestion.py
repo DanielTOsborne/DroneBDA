@@ -9,16 +9,52 @@ import time
 import struct
 
 class ArduinoSensorReader:
-    def __init__(self, bus_number=1, arduino_address=0x0F):
+    def __init__(self, bus_number=1, arduino_address=0x0F, max_retries=3, retry_delay=0.1):
         """
         Initialize I2C communication with Arduino
 
         Args:
             bus_number: I2C bus number (usually 1 on Raspberry Pi)
             arduino_address: I2C address of Arduino (15 in decimal = 0x0F in hex)
+            max_retries: number of retry attempts for each sensor read
+            retry_delay: delay between retries in seconds
         """
-        self.bus = smbus.SMBus(bus_number)
+        self.bus_number = bus_number
         self.arduino_address = arduino_address
+        self.max_retries = max_retries
+        self.retry_delay = retry_delay
+        self._open_bus()
+
+    def _open_bus(self):
+        self.bus = smbus.SMBus(self.bus_number)
+
+    def _reconnect_bus(self):
+        try:
+            self.bus.close()
+        except Exception:
+            pass
+        time.sleep(0.1)
+        self._open_bus()
+
+    def _read_sensor_data(self, command, length, fmt, description):
+        attempts = 0
+        while attempts < self.max_retries:
+            try:
+                data = self.bus.read_i2c_block_data(self.arduino_address, command, length)
+                if len(data) != length:
+                    raise IOError(f"Expected {length} bytes, got {len(data)}")
+                return struct.unpack(fmt, bytes(data))
+            except Exception as exc:
+                attempts += 1
+                print(
+                    f"Warning: {description} read failed (attempt {attempts}/{self.max_retries}): {exc}"
+                )
+                if attempts >= self.max_retries:
+                    print(f"Error: {description} read failed after {self.max_retries} attempts.")
+                    return None
+                self._reconnect_bus()
+                time.sleep(self.retry_delay)
+        return None
 
     def read_acceleration(self):
         """
@@ -27,21 +63,7 @@ class ArduinoSensorReader:
         Returns:
             tuple: (ax, ay, az) in m/s², or None if error
         """
-        try:
-            # Send command 0x01 to request acceleration data
-            self.bus.write_byte(self.arduino_address, 0x01)
-            time.sleep(0.05)  # Small delay for Arduino to process
-
-            # Read 12 bytes (3 floats)
-            data = self.bus.read_i2c_block_data(self.arduino_address, 0x01, 12)
-
-            # Convert bytes to 3 floats (little endian)
-            ax, ay, az = struct.unpack('<fff', bytes(data))
-            return ax, ay, az
-
-        except Exception as e:
-            print(f"Error reading acceleration: {e}")
-            return None
+        return self._read_sensor_data(0x01, 12, '<fff', 'acceleration')
 
     def read_gyroscope(self):
         """
@@ -50,21 +72,7 @@ class ArduinoSensorReader:
         Returns:
             tuple: (gx, gy, gz) in degrees/second, or None if error
         """
-        try:
-            # Send command 0x02 to request gyroscope data
-            self.bus.write_byte(self.arduino_address, 0x02)
-            time.sleep(0.05)  # Small delay for Arduino to process
-
-            # Read 12 bytes (3 floats)
-            data = self.bus.read_i2c_block_data(self.arduino_address, 0x02, 12)
-
-            # Convert bytes to 3 floats (little endian)
-            gx, gy, gz = struct.unpack('<fff', bytes(data))
-            return gx, gy, gz
-
-        except Exception as e:
-            print(f"Error reading gyroscope: {e}")
-            return None
+        return self._read_sensor_data(0x02, 12, '<fff', 'gyroscope')
 
     def read_distance_sensor(self):
         """
@@ -73,21 +81,7 @@ class ArduinoSensorReader:
         Returns:
             tuple: (distance, strength, temperature) or None if error
         """
-        try:
-            # Send command 0x03 to request distance sensor data
-            self.bus.write_byte(self.arduino_address, 0x03)
-            time.sleep(0.05)  # Small delay for Arduino to process
-
-            # Read 6 bytes (3 shorts/int16)
-            data = self.bus.read_i2c_block_data(self.arduino_address, 0x03, 6)
-
-            # Convert bytes to 3 shorts (little endian)
-            dis, str_val, tem = struct.unpack('<hhh', bytes(data))
-            return dis, str_val, tem
-
-        except Exception as e:
-            print(f"Error reading distance sensor: {e}")
-            return None
+        return self._read_sensor_data(0x03, 6, '<hhh', 'distance sensor')
 
     def read_all_sensors(self):
         """
@@ -169,5 +163,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()</content>
-<parameter name="filePath">/home/lars/DroneBDA/SensorCollection/CompilationV2/sensor_reader.py
+    main()
