@@ -200,7 +200,6 @@ if __name__ == "__main__":
 		test = True
 
 	camera_matrix, dist_coeffs = load_calibration("calibration_data.npz")
-
 	while True:
 		print("Waiting for first pass trigger...")
 		while True:
@@ -221,7 +220,10 @@ if __name__ == "__main__":
 
 		frames = []
 		if not test:
-			os.remove("map/snapshot*.jpg")
+			try:
+				os.remove("map/snapshot*.jpg")
+			except:
+				pass
 
 			# Open the V4L2 device
 			with Device.from_id(int(dev_path)) as cam:
@@ -231,7 +233,9 @@ if __name__ == "__main__":
 
 				frames = []
 				prev_img = None
-				while os.path.exists("/tmp/first_pass_lock"):
+				countdown = 30
+				while system_state.read_state()[0] == "cameraScan" and countdown > 0:
+					countdown -= 1
 					frame = next(iter(cam))
 					# Convert MJPEG bytes to an OpenCV image
 					frame = np.frombuffer(frame.data, np.uint8)
@@ -322,21 +326,11 @@ if __name__ == "__main__":
 		
 		system_state.write_state("cameraComplete")
 
-		try:
-			# Push data to socket
-			client_socket = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-			client_socket.connect("/tmp/detection_socket")
+		with open("coordinates.csv", "w") as f:
+			print(f"{origin[0]:.2f}, {origin[1]:.2f}", file=f)
 
-			client_socket.sendall(f"Origin: {origin[0]:.2f}, {origin[1]:.2f}\n".encode())
-
-			# Send circle data
 			for circle in relative_points:
-				data = f"{circle[0]:.2f},{circle[1]:.2f}\n"
-				client_socket.sendall(data.encode())
-
-			client_socket.close()
-		except Exception as e:
-			print("Error sending data to socket:", e)
+				print(f"{circle[0]:.2f},{circle[1]:.2f}", file=f)
 
 		if test:
 			break
