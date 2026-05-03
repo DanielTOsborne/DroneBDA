@@ -431,9 +431,6 @@ FodyWeavers.xsd
 # Cursor — local agent rules / IDE state (teammates use other tools; do not commit)
 .cursor/
 
-# JADRS / ERDC reference PDF (public document; optional local copy — not tracked)
-ERDC-GSL\ SR-25-1.pdf
-
 # Regenerable OpenCV stitch output from StitchTesting harness
 StitchTesting/stitch_pano.jpg
 
