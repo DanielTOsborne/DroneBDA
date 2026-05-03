@@ -17,7 +17,7 @@ TFminiS tfmini(tfSerial);
 void setup() {
   Serial.begin(115200);
 
-  Wire.begin(5);
+  Wire.begin(15);
   Wire.onReceive(receiveHandler);
   Wire.onRequest(requestHandler);
   
